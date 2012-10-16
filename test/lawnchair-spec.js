@@ -496,3 +496,28 @@ test( 'batch add, get, and remove', function() {
         });
     });
 });
+
+test( 'conditional writes', function() {
+    QUnit.stop();
+    QUnit.expect(8);
+
+    store.save({name: 'bar', value: 'foo'}, function(bar) {
+        store.save({name: 'bat', value: 'baz'}, bar, function(bat, success) {
+            equals(success, true, "conditional store should have succeeded");
+            store.all(function(all) {
+                equals(all.length, 1, "bat should have replaced bar");
+                equals(all[0].name, 'bat', "bat is the new name");
+                equals(all[0].value, 'baz', "baz is the new value");
+                store.save({name: 'cat', value: 'dog'}, bar, function(cat, success) {
+                    equals(success, false, "bar has been changed so store should not succeed");
+                    store.all(function(all) {
+                        equals(all.length, 1, "bat should still be only key");
+                        equals(all[0].name, 'bat', "bat is still the name");
+                        equals(all[0].value, 'baz', "baz is still the value");
+                        QUnit.start();
+                    });
+                });
+            });
+        });
+    });
+});
