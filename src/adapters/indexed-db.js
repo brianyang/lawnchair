@@ -61,16 +61,14 @@ Lawnchair.adapter('indexed-db', (function(){
             } catch (e2) { /* ignore */ }
 
             // ok, create object store.
-            self.store = self.db.createObjectStore(STORE_NAME,
-                                                   { autoIncrement: true} );
-            for (var i = 0; i < self.waiting.length; i++) {
-                self.waiting[i].call(self);
-            }
-            self.waiting = [];
-            win();
+            self.db.createObjectStore(STORE_NAME, { autoIncrement: true});
+            self.store = true;
         };
         request.onupgradeneeded = function(event) {
+            self.db = request.result;
+            self.transaction = request.transaction;
             upgrade(event.oldVersion, event.newVersion);
+            // will end up in onsuccess callback
         };
         request.onsuccess = function(event) {
            self.db = request.result; 
@@ -84,14 +82,19 @@ Lawnchair.adapter('indexed-db', (function(){
               setVrequest.onsuccess = function(e) {
                   setVrequest.onsuccess = setVrequest.onerror = null;
                   upgrade(oldVersion, STORE_VERSION);
+                  for (var i = 0; i < self.waiting.length; i++) {
+                      self.waiting[i].call(self);
+                  }
+                  self.waiting = [];
+                  win();
               };
               setVrequest.onerror = function(e) {
                   setVrequest.onsuccess = setVrequest.onerror = null;
                   console.log("Failed to create objectstore " + e);
                   fail(e);
-              }
+              };
             } else {
-                self.store = {};
+                self.store = true;
                 for (var i = 0; i < self.waiting.length; i++) {
                       self.waiting[i].call(self);
                 }
