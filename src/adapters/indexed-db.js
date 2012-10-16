@@ -28,6 +28,11 @@ Lawnchair.adapter('indexed-db', (function(){
           window.mozIDBKeyRange || window.oIDBKeyRange ||
           window.msIDBKeyRange;
   };
+  var getIDBDatabaseException = function() {
+      return window.IDBDatabaseException || window.webkitIDBDatabaseException ||
+          window.mozIDBDatabaseException || window.oIDBDatabaseException ||
+          window.msIDBDatabaseException;
+  };
 
 
   return {
@@ -94,7 +99,15 @@ Lawnchair.adapter('indexed-db', (function(){
                 win();
             }
         }
-        request.onerror = fail;
+        request.onerror = function(ev) {
+            if (request.errorCode === getIDBDatabaseException().VERSION_ERR) {
+                // xxx blow it away
+                self.idb.deleteDatabase(self.name);
+                // try it again.
+                return self.init(options, callback);
+            }
+            console.error('Failed to open database');
+        };
     },
 
     save:function(obj, callback) {
