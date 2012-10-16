@@ -65,7 +65,7 @@ Lawnchair.adapter('indexed-db', (function(){
             } catch (e2) { /* ignore */ }
 
             // ok, create object store.
-            self.db.createObjectStore(STORE_NAME, { autoIncrement: true});
+            self.db.createObjectStore(STORE_NAME/*, { autoIncrement: true}*/);
             self.store = true;
         };
         request.onupgradeneeded = function(event) {
