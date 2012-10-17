@@ -15,6 +15,7 @@ Lawnchair.adapter('nell-colors-journal', (function() {
     var uuid = (function() {
         var _uuid = null;
         return function(lawnchair) {
+            if (lawnchair._wildcard) { return '*'; }
             if (!_uuid) {
                 // try to get uuid from domStorage
                 _uuid = domStorage.getItem(UUID_KEY);
@@ -103,6 +104,7 @@ Lawnchair.adapter('nell-colors-journal', (function() {
             return true;
         },
         init: function(options, callback) {
+            this._wildcard = !!options.wildcard;
             uuid(this);
             this.fn(this.name, callback).call(this, this);
             return this;
